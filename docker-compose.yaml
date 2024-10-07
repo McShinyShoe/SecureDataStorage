@@ -1,0 +1,67 @@
+services:
+  app:
+    image: nginx:stable-alpine
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./web:/var/www/html
+    depends_on:
+      - php
+      - mysql
+    ports:
+      - 80:80
+    networks:
+      - laravel-net
+  php:
+    build:
+      context: ./php
+      dockerfile: php.dockerfile
+    volumes:
+      - ./web:/var/www/html
+    networks:
+      - laravel-net
+  mysql:
+    image: mysql:latest
+    env_file:
+      - ./mysql/mysql.env
+    networks:
+      - laravel-net
+  phpmyadmin:
+    depends_on:
+      - mysql
+    image: phpmyadmin:latest
+    environment:
+      PMA_HOST: mysql
+    ports:
+      - 8080:80
+    networks:
+      - laravel-net
+  composer:
+    build:
+      context: ./composer
+      dockerfile: composer.dockerfile
+    volumes:
+      - ./web:/var/www/html
+    networks:
+      - laravel-net
+  artisan:
+    build:
+      context: ./php
+      dockerfile: php.dockerfile
+    volumes:
+      - ./web:/var/www/html
+    ports:
+      - 8000:8000
+    entrypoint: ["php", "/var/www/html/artisan"]
+    networks:
+      - laravel-net
+  npm:
+    image: node:alpine
+    working_dir: /var/www/html
+    entrypoint: ["npm"]
+    volumes:
+      - ./web:/var/www/html
+    networks:
+      - laravel-net
+      
+networks:
+  laravel-net:
