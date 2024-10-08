@@ -21,7 +21,7 @@ init:
 	mkdir -p web
 	docker compose run --rm --build composer create-project laravel/laravel .
 
-purge:t
+purge:
 	sudo rm web -rf
 
 app:
